@@ -2,8 +2,10 @@
   <Folder Name="/src/">
     <Project Path="src/OrderManagement.Api/OrderManagement.Api.csproj" />
     <Project Path="src/OrderManagement.Domain/OrderManagement.Domain.csproj" />
+    <Project Path="src/OrderManagement.Infrastructure/OrderManagement.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/OrderManagement.Domain.Tests/OrderManagement.Domain.Tests.csproj" />
+    <Project Path="tests/OrderManagement.Infrastructure.Tests/OrderManagement.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>
