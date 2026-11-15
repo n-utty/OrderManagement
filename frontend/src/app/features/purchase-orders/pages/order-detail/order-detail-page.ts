@@ -3,13 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  afterNextRender,
   computed,
   inject,
   input,
   signal,
 } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Params, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ApiError } from '../../../../core/http/api-error';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
@@ -19,6 +20,7 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { OrderStatusActions } from '../../components/order-status-actions/order-status-actions';
 import { PurchaseOrdersApi } from '../../data-access/purchase-orders.api';
 import { OrderStatus } from '../../models';
+import { OrderBanner, readOrderNavigationState } from '../../order-navigation-state';
 
 @Component({
   selector: 'app-order-detail-page',
@@ -40,10 +42,17 @@ export class OrderDetailPage {
   private readonly api = inject(PurchaseOrdersApi);
   private readonly destroyRef = inject(DestroyRef);
 
+  private readonly location = inject(Location);
+  private readonly navigationState = readOrderNavigationState(inject(Router), this.location);
+
   readonly id = input.required<string>();
 
-  // The list passes its filter and page in navigation state; history keeps it across a refresh.
-  protected readonly backQuery = listQueryFrom(inject(Router), inject(Location));
+  protected readonly backQuery = this.navigationState.listQuery ?? {};
+  protected readonly banner = signal<OrderBanner | null>(this.navigationState.banner ?? null);
+
+  constructor() {
+    afterNextRender(() => this.forgetBanner());
+  }
 
   protected readonly order = rxResource({
     params: () => this.id(),
@@ -79,11 +88,14 @@ export class OrderDetailPage {
         },
       });
   }
-}
 
-function listQueryFrom(router: Router, location: Location): Params {
-  const state = (router.currentNavigation()?.extras.state ?? location.getState()) as {
-    listQuery?: Params;
-  } | null;
-  return state?.listQuery ?? {};
+  // The banner is shown once: drop it from history so a refresh or back/forward doesn't repeat it.
+  // The rest of the state (the router's own bookkeeping, the list query) is kept.
+  private forgetBanner(): void {
+    const state = this.location.getState();
+    if (state && typeof state === 'object' && 'banner' in state) {
+      const { banner: _, ...rest } = state as Record<string, unknown>;
+      this.location.replaceState(this.location.path(), '', rest);
+    }
+  }
 }

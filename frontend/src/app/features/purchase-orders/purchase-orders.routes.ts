@@ -10,7 +10,8 @@ export const PURCHASE_ORDER_ROUTES: Routes = [
     // Declared before ':id' so "new" is never read as an order id.
     path: 'new',
     title: 'New order · Order Management',
-    loadComponent: () => import('./pages/new-order/new-order-page').then((m) => m.NewOrderPage),
+    loadComponent: () =>
+      import('./pages/order-create/order-create-page').then((m) => m.OrderCreatePage),
   },
   {
     path: ':id',

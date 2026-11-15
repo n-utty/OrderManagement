@@ -1,0 +1,183 @@
+<a class="back-link" routerLink="/orders">← Back to orders</a>
+
+<header class="page-header">
+  <h1>New order</h1>
+  <p class="muted">
+    Record a customer's purchase order. Submitting the same reference again won't create a
+    duplicate.
+  </p>
+</header>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (failure(); as failure) {
+    <div id="submit-feedback" class="feedback" tabindex="-1">
+      @if (failure.kind === 'invalid') {
+        <div class="alert-error" role="alert">
+          <p class="alert-title">{{ failure.title }}</p>
+          <p>Fix the highlighted fields and submit again.</p>
+          @if (failure.messages.length) {
+            <ul>
+              @for (message of failure.messages; track message) {
+                <li>{{ message }}</li>
+              }
+            </ul>
+          }
+        </div>
+      } @else if (failure.kind === 'conflict') {
+        <div class="alert-error" role="alert">
+          <p class="alert-title">This reference already belongs to a different order.</p>
+          <p>{{ failure.message }}</p>
+          @if (failure.existingOrderId) {
+            <a class="alert-link" [routerLink]="['/orders', failure.existingOrderId]">
+              Open existing order
+            </a>
+          }
+        </div>
+      } @else if (failure.kind === 'network') {
+        <div class="alert-error" role="alert">
+          <p class="alert-title">Couldn't reach the server. Your order wasn't lost – try again.</p>
+          <p>Submitting again with the same reference won't create a duplicate.</p>
+        </div>
+      } @else {
+        <app-error-message [error]="failure.error" />
+      }
+    </div>
+  }
+
+  <!-- Native disabling while submitting: nothing can change between request and response. -->
+  <fieldset class="sections" [disabled]="submitting()">
+    <section class="panel" aria-labelledby="order-heading">
+      <h2 id="order-heading">Order</h2>
+      <div class="fields">
+        @let referenceError = error(form.controls.externalReference);
+        <div class="field">
+          <label for="externalReference">External reference</label>
+          <input
+            id="externalReference"
+            class="mono"
+            autocomplete="off"
+            formControlName="externalReference"
+            [attr.aria-invalid]="referenceError ? 'true' : null"
+            [attr.aria-describedby]="
+              referenceError
+                ? 'externalReference-hint externalReference-error'
+                : 'externalReference-hint'
+            "
+          />
+          <p class="field-hint" id="externalReference-hint">
+            The customer's PO number. Letters, digits and - _ / . # only; stored in upper case.
+          </p>
+          @if (referenceError) {
+            <p class="field-error" id="externalReference-error">{{ referenceError }}</p>
+          }
+        </div>
+
+        @let currencyError = error(form.controls.currency);
+        <div class="field">
+          <label for="currency">Currency</label>
+          <select
+            id="currency"
+            formControlName="currency"
+            [attr.aria-invalid]="currencyError ? 'true' : null"
+            [attr.aria-describedby]="currencyError ? 'currency-error' : null"
+          >
+            <option value="">Select a currency</option>
+            @for (currency of currencies; track currency) {
+              <option [value]="currency">{{ currency }}</option>
+            }
+          </select>
+          @if (currencyError) {
+            <p class="field-error" id="currency-error">{{ currencyError }}</p>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="customer-heading">
+      <h2 id="customer-heading">Customer</h2>
+      <div class="fields">
+        @let customerIdError = error(form.controls.customerId);
+        <div class="field">
+          <label for="customerId">Customer ID</label>
+          <input
+            id="customerId"
+            class="mono"
+            autocomplete="off"
+            formControlName="customerId"
+            [attr.aria-invalid]="customerIdError ? 'true' : null"
+            [attr.aria-describedby]="customerIdError ? 'customerId-error' : null"
+          />
+          @if (customerIdError) {
+            <p class="field-error" id="customerId-error">{{ customerIdError }}</p>
+          }
+        </div>
+
+        @let customerNameError = error(form.controls.customerName);
+        <div class="field">
+          <label for="customerName">Customer name</label>
+          <input
+            id="customerName"
+            autocomplete="organization"
+            formControlName="customerName"
+            [attr.aria-invalid]="customerNameError ? 'true' : null"
+            [attr.aria-describedby]="customerNameError ? 'customerName-error' : null"
+          />
+          @if (customerNameError) {
+            <p class="field-error" id="customerName-error">{{ customerNameError }}</p>
+          }
+        </div>
+
+        @let customerEmailError = error(form.controls.customerEmail);
+        <div class="field">
+          <label for="customerEmail">Customer email</label>
+          <input
+            id="customerEmail"
+            type="email"
+            autocomplete="email"
+            formControlName="customerEmail"
+            [attr.aria-invalid]="customerEmailError ? 'true' : null"
+            [attr.aria-describedby]="customerEmailError ? 'customerEmail-error' : null"
+          />
+          @if (customerEmailError) {
+            <p class="field-error" id="customerEmail-error">{{ customerEmailError }}</p>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="items-heading">
+      <h2 id="items-heading">Line items</h2>
+      <app-line-items-editor
+        [items]="form.controls.lineItems"
+        [currency]="form.controls.currency.value"
+        [submitAttempts]="submitAttempts()"
+      />
+    </section>
+
+    <section class="panel" aria-labelledby="notes-heading">
+      <h2 id="notes-heading">Notes</h2>
+      @let notesError = error(form.controls.notes);
+      <div class="field">
+        <label for="notes" class="visually-hidden">Notes</label>
+        <textarea
+          id="notes"
+          rows="3"
+          formControlName="notes"
+          [attr.aria-invalid]="notesError ? 'true' : null"
+          [attr.aria-describedby]="notesError ? 'notes-hint notes-error' : 'notes-hint'"
+        ></textarea>
+        <p class="field-hint" id="notes-hint">Optional. Up to {{ limits.notes }} characters.</p>
+        @if (notesError) {
+          <p class="field-error" id="notes-error">{{ notesError }}</p>
+        }
+      </div>
+    </section>
+  </fieldset>
+
+  <div class="actions">
+    <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+      {{ submitting() ? 'Submitting…' : 'Submit order' }}
+    </button>
+    <a class="btn btn-secondary" routerLink="/orders">Cancel</a>
+  </div>
+</form>
