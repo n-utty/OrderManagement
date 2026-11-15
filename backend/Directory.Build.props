@@ -7,5 +7,8 @@
     <LangVersion>latest</LangVersion>
     <!-- Nullable warnings are real bugs in a domain model, so fail the build on them. -->
     <WarningsAsErrors>nullable</WarningsAsErrors>
+    <!-- Run through "dotnet <app>.dll" instead of a generated .exe: managed machines often block 
+         freshly built unsigned executables ("Access is denied"), and nothing here needs the .exe. -->
+    <UseAppHost>false</UseAppHost>
   </PropertyGroup>
 </Project>

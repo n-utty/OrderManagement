@@ -45,8 +45,8 @@ export function createOrderForm(fb: NonNullableFormBuilder): OrderForm {
       referenceFormat,
     ]),
     customerId: fb.control('', [
-      requiredText('Customer ID'),
-      maxLength('Customer ID', ORDER_LIMITS.customerId),
+      requiredText('Customer account no.'),
+      maxLength('Customer account no.', ORDER_LIMITS.customerId),
     ]),
     customerName: fb.control('', [
       requiredText('Customer name'),
