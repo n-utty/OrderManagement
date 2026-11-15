@@ -1,0 +1,90 @@
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.page-header p {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.toolbar label {
+  margin: 0;
+}
+
+.toolbar select {
+  width: 12rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: var(--border);
+  border-radius: var(--radius);
+  transition: opacity 120ms;
+}
+
+.table-wrap.is-stale {
+  opacity: 0.6;
+}
+
+/* The reference link stretches over its row, so the whole row is one link. */
+.table tbody tr {
+  position: relative;
+}
+
+.row-link {
+  color: var(--color-ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.row-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.row-link:focus-visible {
+  outline: none;
+}
+
+.table tbody tr:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.table tbody tr:hover .row-link {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.date {
+  color: var(--color-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.pager-buttons {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}

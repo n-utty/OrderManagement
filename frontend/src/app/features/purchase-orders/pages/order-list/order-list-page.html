@@ -1,0 +1,114 @@
+<header class="page-header">
+  <div>
+    <h1>Orders</h1>
+    <p class="muted">Customer purchase orders, newest first.</p>
+  </div>
+  <a class="btn btn-primary" routerLink="new">New order</a>
+</header>
+
+<div class="toolbar">
+  <label for="status-filter">Status</label>
+  <select id="status-filter" #statusFilter (change)="filterBy(statusFilter.value)">
+    <option value="" [selected]="!selectedStatus()">All</option>
+    @for (status of statuses; track status) {
+      <option [value]="status" [selected]="status === selectedStatus()">{{ status }}</option>
+    }
+  </select>
+</div>
+
+@let data = result();
+
+@if (orders.error(); as error) {
+  <app-error-message [error]="error" retryable (retry)="orders.reload()" />
+} @else if (data && data.items.length > 0) {
+  <div
+    class="table-wrap"
+    [class.is-stale]="orders.isLoading()"
+    [attr.aria-busy]="orders.isLoading()"
+  >
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Reference</th>
+          <th scope="col">Customer</th>
+          <th scope="col" class="num">Items</th>
+          <th scope="col" class="num">Total</th>
+          <th scope="col">Status</th>
+          <th scope="col">Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of data.items; track order.id) {
+          <tr>
+            <td>
+              <a class="row-link mono" [routerLink]="order.id" [state]="{ listQuery: listQuery() }">
+                {{ order.externalReference }}
+              </a>
+            </td>
+            <td>{{ order.customerName }}</td>
+            <td class="num">{{ order.lineItems.length }}</td>
+            <td class="num">
+              <span class="muted">{{ order.currency }}</span> {{ order.total | number: '1.2-2' }}
+            </td>
+            <td><app-status-badge [status]="order.status" /></td>
+            <td class="date">
+              <time [attr.datetime]="order.createdAt">{{
+                order.createdAt | date: 'd MMM y, HH:mm'
+              }}</time>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <nav class="pager" aria-label="Pagination">
+    @if (range(); as range) {
+      <p class="muted num" aria-live="polite">
+        Showing {{ range.from }}–{{ range.to }} of {{ range.total }}
+      </p>
+    }
+    @if (data.totalPages > 1) {
+      <div class="pager-buttons">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="data.page <= 1 || orders.isLoading()"
+          (click)="goToPage(data.page - 1)"
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="data.page >= data.totalPages || orders.isLoading()"
+          (click)="goToPage(data.page + 1)"
+        >
+          Next
+        </button>
+      </div>
+    }
+  </nav>
+} @else if (orders.isLoading() || !data) {
+  <app-loading-state label="Loading orders…" />
+} @else if (data.totalCount > 0) {
+  <app-empty-state
+    title="Nothing on this page"
+    message="There are fewer orders than this page needs."
+  >
+    <button type="button" class="btn btn-secondary" (click)="goToPage(1)">
+      Go to the first page
+    </button>
+  </app-empty-state>
+} @else if (selectedStatus(); as status) {
+  <app-empty-state [title]="'No ' + status.toLowerCase() + ' orders'" message="Try another status.">
+    <button type="button" class="btn btn-secondary" (click)="filterBy('')">Show all orders</button>
+  </app-empty-state>
+} @else {
+  <app-empty-state
+    title="No orders yet"
+    message="Purchase orders you record will be listed here, with their status."
+  >
+    <a class="btn btn-primary" routerLink="new">Record the first order</a>
+  </app-empty-state>
+}
