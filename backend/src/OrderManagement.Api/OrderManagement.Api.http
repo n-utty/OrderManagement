@@ -1,0 +1,11 @@
+@OrderManagement.Api_HostAddress = http://localhost:5224
+
+GET {{OrderManagement.Api_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###
+
+GET {{OrderManagement.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
