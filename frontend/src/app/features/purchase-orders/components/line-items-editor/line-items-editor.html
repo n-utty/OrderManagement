@@ -1,0 +1,139 @@
+<div class="table-wrap">
+  <table class="table lines">
+    <thead>
+      <tr>
+        <th scope="col" class="col-sku">SKU</th>
+        <th scope="col">Name</th>
+        <th scope="col" class="num col-qty">Quantity</th>
+        <th scope="col" class="num col-price">Unit price</th>
+        <th scope="col" class="num col-total">Line total</th>
+        <th scope="col" class="col-actions"><span class="visually-hidden">Actions</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (line of items().controls; track line; let i = $index) {
+        @let id = 'line-' + i;
+        @let skuMessage = skuError(line);
+        @let nameMessage = error(line.controls.name);
+        @let quantityMessage = error(line.controls.quantity);
+        @let priceMessage = error(line.controls.unitPrice);
+        @let lineTotal = estimate().lines[i];
+        <tr>
+          <td>
+            <label class="visually-hidden" [for]="id + '-sku'">SKU, line {{ i + 1 }}</label>
+            <input
+              [id]="id + '-sku'"
+              class="mono"
+              autocomplete="off"
+              [formControl]="line.controls.sku"
+              [attr.aria-invalid]="skuMessage ? 'true' : null"
+              [attr.aria-describedby]="skuMessage ? id + '-sku-error' : null"
+            />
+            @if (skuMessage) {
+              <p class="field-error" [id]="id + '-sku-error'">{{ skuMessage }}</p>
+            }
+          </td>
+          <td>
+            <label class="visually-hidden" [for]="id + '-name'">Name, line {{ i + 1 }}</label>
+            <input
+              [id]="id + '-name'"
+              autocomplete="off"
+              [formControl]="line.controls.name"
+              [attr.aria-invalid]="nameMessage ? 'true' : null"
+              [attr.aria-describedby]="nameMessage ? id + '-name-error' : null"
+            />
+            @if (nameMessage) {
+              <p class="field-error" [id]="id + '-name-error'">{{ nameMessage }}</p>
+            }
+          </td>
+          <td>
+            <label class="visually-hidden" [for]="id + '-quantity'"
+              >Quantity, line {{ i + 1 }}</label
+            >
+            <input
+              [id]="id + '-quantity'"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              step="1"
+              class="num"
+              [formControl]="line.controls.quantity"
+              [attr.aria-invalid]="quantityMessage ? 'true' : null"
+              [attr.aria-describedby]="quantityMessage ? id + '-quantity-error' : null"
+            />
+            @if (quantityMessage) {
+              <p class="field-error" [id]="id + '-quantity-error'">{{ quantityMessage }}</p>
+            }
+          </td>
+          <td>
+            <label class="visually-hidden" [for]="id + '-price'"
+              >Unit price, line {{ i + 1 }}</label
+            >
+            <input
+              [id]="id + '-price'"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.01"
+              class="num"
+              [formControl]="line.controls.unitPrice"
+              [attr.aria-invalid]="priceMessage ? 'true' : null"
+              [attr.aria-describedby]="priceMessage ? id + '-price-error' : null"
+            />
+            @if (priceMessage) {
+              <p class="field-error" [id]="id + '-price-error'">{{ priceMessage }}</p>
+            }
+          </td>
+          <td class="num line-total">
+            @if (lineTotal !== null && lineTotal !== undefined) {
+              <span class="muted">{{ currency() }}</span> {{ lineTotal | number: '1.2-2' }}
+            } @else {
+              <span class="muted" aria-label="Not yet calculable">–</span>
+            }
+          </td>
+          <td class="col-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              [disabled]="items().length === 1"
+              [attr.aria-label]="'Remove line ' + (i + 1)"
+              (click)="remove(i)"
+            >
+              Remove
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <th scope="row" colspan="4" class="num">Subtotal</th>
+        <td class="num line-total">
+          @let subtotal = estimate().subtotal;
+          @if (subtotal !== null) {
+            <span class="muted">{{ currency() }}</span> {{ subtotal | number: '1.2-2' }}
+          } @else {
+            <span class="muted">–</span>
+          }
+        </td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="footer">
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [disabled]="items().length >= maxLines"
+    (click)="add()"
+  >
+    Add line
+  </button>
+  <p class="estimate-note">Estimate – final totals are calculated by the server</p>
+</div>
+
+@if (listError(); as message) {
+  <p class="field-error" role="alert">{{ message }}</p>
+}

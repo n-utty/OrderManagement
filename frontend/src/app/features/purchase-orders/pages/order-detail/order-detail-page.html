@@ -3,6 +3,21 @@
 @if (order.hasValue()) {
   @let po = order.value();
 
+  @if (banner(); as kind) {
+    <div class="notice" role="status">
+      <div>
+        @if (kind === 'created') {
+          <p class="notice-title">Order created</p>
+          <p>The order has been recorded with status {{ po.status }}.</p>
+        } @else {
+          <p class="notice-title">This order was already submitted – showing the existing order</p>
+          <p>Nothing new was created; this is the order captured the first time.</p>
+        }
+      </div>
+      <button type="button" class="btn btn-secondary" (click)="banner.set(null)">Dismiss</button>
+    </div>
+  }
+
   <header class="page-header">
     <p class="muted eyebrow">Purchase order</p>
     <div class="title-row">

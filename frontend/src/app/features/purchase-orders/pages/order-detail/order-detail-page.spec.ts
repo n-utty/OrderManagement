@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
@@ -148,5 +149,29 @@ describe('OrderDetailPage', () => {
     expect(page.querySelector('.back-link')?.getAttribute('href')).toBe(
       '/orders?status=Confirmed&page=2',
     );
+  });
+
+  it.each([
+    ['created', 'Order created'],
+    ['already-submitted', 'This order was already submitted – showing the existing order'],
+  ])('shows the %s banner once, then forgets it', async (banner, text) => {
+    await TestBed.inject(Router).navigateByUrl(`/orders/${id}`, {
+      state: { banner, listQuery: { page: 2 } },
+    });
+    TestBed.tick();
+    backend.expectOne(orderUrl).flush(aPurchaseOrder({ id }));
+    const page = await render();
+
+    expect(page.querySelector('.notice')?.textContent).toContain(text);
+    // Gone from history so a refresh won't repeat it; the rest of the state is kept.
+    const state = TestBed.inject(Location).getState() as Record<string, unknown>;
+    expect(state['banner']).toBeUndefined();
+    expect(state['listQuery']).toEqual({ page: 2 });
+  });
+
+  it('shows no banner when arriving from the list', async () => {
+    const page = await openWith();
+
+    expect(page.querySelector('.notice')).toBeNull();
   });
 });
