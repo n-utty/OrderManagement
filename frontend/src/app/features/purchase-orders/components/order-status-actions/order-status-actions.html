@@ -1,0 +1,30 @@
+@if (allowed().length === 0) {
+  <p class="muted final">This order is in a final status.</p>
+} @else if (confirmingCancel()) {
+  <div class="confirm" role="group" aria-labelledby="cancel-question">
+    <p id="cancel-question">Cancel this order? This can't be undone.</p>
+    <div class="actions">
+      <button type="button" class="btn btn-primary" (click)="confirmCancel()">
+        Yes, cancel order
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="confirmingCancel.set(false)">
+        Keep order
+      </button>
+    </div>
+  </div>
+} @else {
+  <div class="actions">
+    @for (status of allowed(); track status) {
+      <button
+        type="button"
+        class="btn"
+        [class.btn-primary]="status !== 'Cancelled'"
+        [class.btn-secondary]="status === 'Cancelled'"
+        [disabled]="saving() !== null"
+        (click)="choose(status)"
+      >
+        {{ saving() === status ? 'Saving…' : labels[status] }}
+      </button>
+    }
+  </div>
+}

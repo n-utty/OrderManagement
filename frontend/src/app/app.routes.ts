@@ -4,9 +4,10 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'orders' },
   {
     path: 'orders',
-    title: 'Orders · Order Management',
-    loadComponent: () =>
-      import('./features/purchase-orders/pages/orders-page').then((m) => m.OrdersPage),
+    loadChildren: () =>
+      import('./features/purchase-orders/purchase-orders.routes').then(
+        (m) => m.PURCHASE_ORDER_ROUTES,
+      ),
   },
   {
     path: '**',

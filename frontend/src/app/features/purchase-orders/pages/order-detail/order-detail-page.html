@@ -1,0 +1,119 @@
+<a class="back-link" routerLink="/orders" [queryParams]="backQuery">← Back to orders</a>
+
+@if (order.hasValue()) {
+  @let po = order.value();
+
+  <header class="page-header">
+    <p class="muted eyebrow">Purchase order</p>
+    <div class="title-row">
+      <h1 class="mono">{{ po.externalReference }}</h1>
+      <app-status-badge [status]="po.status" />
+    </div>
+    <p class="muted meta">
+      Created
+      <time [attr.datetime]="po.createdAt">{{ po.createdAt | date: 'd MMM y, HH:mm' }}</time>
+      @if (po.updatedAt) {
+        <span aria-hidden="true">·</span>
+        Updated
+        <time [attr.datetime]="po.updatedAt">{{ po.updatedAt | date: 'd MMM y, HH:mm' }}</time>
+      }
+    </p>
+  </header>
+
+  <section class="panel" aria-labelledby="status-heading">
+    <h2 id="status-heading">Status</h2>
+    <app-order-status-actions
+      [allowed]="po.allowedTransitions"
+      [saving]="savingStatus()"
+      (statusChange)="changeStatus($event)"
+    />
+    @if (statusError(); as error) {
+      <app-error-message class="status-error" [error]="error" />
+    }
+  </section>
+
+  <div class="columns">
+    <section class="panel" aria-labelledby="customer-heading">
+      <h2 id="customer-heading">Customer</h2>
+      <dl>
+        <dt>Customer ID</dt>
+        <dd class="mono">{{ po.customerId }}</dd>
+        <dt>Name</dt>
+        <dd>{{ po.customerName }}</dd>
+        <dt>Email</dt>
+        <dd>
+          <a [href]="'mailto:' + po.customerEmail">{{ po.customerEmail }}</a>
+        </dd>
+      </dl>
+    </section>
+
+    <section class="panel" aria-labelledby="order-heading">
+      <h2 id="order-heading">Order</h2>
+      <dl>
+        <dt>Currency</dt>
+        <dd class="mono">{{ po.currency }}</dd>
+        <dt>Notes</dt>
+        <dd class="notes">
+          @if (po.notes) {
+            {{ po.notes }}
+          } @else {
+            <span class="muted">None</span>
+          }
+        </dd>
+      </dl>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="items-heading">
+    <h2 id="items-heading">Line items</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">SKU</th>
+            <th scope="col">Name</th>
+            <th scope="col" class="num">Quantity</th>
+            <th scope="col" class="num">Unit price</th>
+            <th scope="col" class="num">Line total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of po.lineItems; track $index) {
+            <tr>
+              <td class="mono">{{ item.sku }}</td>
+              <td>{{ item.name }}</td>
+              <td class="num">{{ item.quantity }}</td>
+              <td class="num">{{ item.unitPrice | number: '1.2-2' }}</td>
+              <td class="num">{{ item.lineTotal | number: '1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" colspan="4" class="num">Subtotal</th>
+            <td class="num">
+              <span class="muted">{{ po.currency }}</span> {{ po.subtotal | number: '1.2-2' }}
+            </td>
+          </tr>
+          <tr class="total">
+            <th scope="row" colspan="4" class="num">Total</th>
+            <td class="num">
+              <span class="muted">{{ po.currency }}</span> {{ po.total | number: '1.2-2' }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+} @else if (notFound()) {
+  <app-empty-state
+    title="Order not found"
+    message="It may have been removed, or the link may be wrong."
+  >
+    <a class="btn btn-secondary" routerLink="/orders" [queryParams]="backQuery">Back to orders</a>
+  </app-empty-state>
+} @else if (order.error(); as error) {
+  <app-error-message [error]="error" retryable (retry)="order.reload()" />
+} @else {
+  <app-loading-state label="Loading order…" />
+}
