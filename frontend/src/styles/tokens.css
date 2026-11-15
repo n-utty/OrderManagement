@@ -1,0 +1,58 @@
+/*
+ * Three base colours per theme (background, ink, accent) plus a muted red reserved for errors.
+ * Everything else is mixed from those so the two themes stay consistent.
+ */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --color-bg: #f8f8f6;
+  --color-ink: #1c2230;
+  --color-accent: #1f4e8c;
+  --color-error: #a33a3a;
+  --color-surface: color-mix(in srgb, var(--color-bg) 30%, #fff);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #12151c;
+  --color-ink: #e4e6eb;
+  --color-accent: #7fa6db;
+  --color-error: #e08a8a;
+  --color-surface: color-mix(in srgb, var(--color-bg) 95%, var(--color-ink));
+}
+
+/* Declared on the same element as data-theme, so var() resolves against the active theme. */
+:root {
+  --color-border: color-mix(in srgb, var(--color-ink) 14%, var(--color-bg));
+  --color-border-strong: color-mix(in srgb, var(--color-ink) 30%, var(--color-bg));
+  --color-muted: color-mix(in srgb, var(--color-ink) 64%, var(--color-bg));
+  --color-hover: color-mix(in srgb, var(--color-ink) 5%, var(--color-bg));
+  --color-accent-tint: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg));
+  --color-accent-strong: color-mix(in srgb, var(--color-accent) 85%, var(--color-ink));
+  --color-on-accent: var(--color-bg);
+  --color-error-tint: color-mix(in srgb, var(--color-error) 10%, var(--color-bg));
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'Cascadia Mono', Consolas, 'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius-sm: 4px;
+  --radius: 6px;
+  --border: 1px solid var(--color-border);
+  --content-max: 1100px;
+  --control-height: 2.25rem;
+}
