@@ -1,11 +1,91 @@
-@OrderManagement.Api_HostAddress = http://localhost:5224
+@host = http://localhost:5224
+@reference = PO-2001
 
-GET {{OrderManagement.Api_HostAddress}}/openapi/v1.json
+### Create an order (201 Created, Location header points at the new order)
+# @name create
+POST {{host}}/api/purchase-orders
+Content-Type: application/json
+
+{
+  "externalReference": "{{reference}}",
+  "customerId": "CUST-001",
+  "customerName": "Acme Trading",
+  "customerEmail": "buyer@acme.test",
+  "currency": "ZAR",
+  "notes": "Deliver to loading bay 2",
+  "lineItems": [
+    { "sku": "SKU-A", "name": "Widget", "quantity": 3, "unitPrice": 10.50 },
+    { "sku": "SKU-B", "name": "Gadget", "quantity": 1, "unitPrice": 99.99 }
+  ]
+}
+
+### Replay the same order (200 OK, same id as above, nothing new is created)
+POST {{host}}/api/purchase-orders
+Content-Type: application/json
+
+{
+  "externalReference": "{{reference}}",
+  "customerId": "CUST-001",
+  "customerName": "Acme Trading",
+  "customerEmail": "buyer@acme.test",
+  "currency": "ZAR",
+  "notes": "Deliver to loading bay 2",
+  "lineItems": [
+    { "sku": "SKU-A", "name": "Widget", "quantity": 3, "unitPrice": 10.50 },
+    { "sku": "SKU-B", "name": "Gadget", "quantity": 1, "unitPrice": 99.99 }
+  ]
+}
+
+### Same reference, different details (409 Conflict with existingOrderId)
+POST {{host}}/api/purchase-orders
+Content-Type: application/json
+
+{
+  "externalReference": "{{reference}}",
+  "customerId": "CUST-001",
+  "customerName": "Acme Trading",
+  "customerEmail": "buyer@acme.test",
+  "currency": "ZAR",
+  "lineItems": [
+    { "sku": "SKU-A", "name": "Widget", "quantity": 5, "unitPrice": 10.50 }
+  ]
+}
+
+### Invalid input (400 Bad Request with errors grouped by field)
+POST {{host}}/api/purchase-orders
+Content-Type: application/json
+
+{
+  "externalReference": "",
+  "customerId": "CUST-001",
+  "customerName": "",
+  "customerEmail": "not-an-email",
+  "currency": "XYZ",
+  "lineItems": [
+    { "sku": "SKU-A", "name": "Widget", "quantity": 0, "unitPrice": -1 }
+  ]
+}
+
+### List orders, newest first (optional: status, page, pageSize)
+GET {{host}}/api/purchase-orders?status=Pending&page=1&pageSize=20
 Accept: application/json
 
-###
-
-GET {{OrderManagement.Api_HostAddress}}/weatherforecast/
+### Get one order
+GET {{host}}/api/purchase-orders/{{create.response.body.$.id}}
 Accept: application/json
 
-###
+### Valid status change: Pending -> Confirmed (200 OK)
+PUT {{host}}/api/purchase-orders/{{create.response.body.$.id}}/status
+Content-Type: application/json
+
+{
+  "status": "Confirmed"
+}
+
+### Invalid status change: Confirmed -> Pending (422 with allowedTransitions)
+PUT {{host}}/api/purchase-orders/{{create.response.body.$.id}}/status
+Content-Type: application/json
+
+{
+  "status": "Pending"
+}
