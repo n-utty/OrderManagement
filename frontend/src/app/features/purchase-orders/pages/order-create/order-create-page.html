@@ -98,15 +98,19 @@
       <div class="fields">
         @let customerIdError = error(form.controls.customerId);
         <div class="field">
-          <label for="customerId">Customer ID</label>
+          <label for="customerId">Customer account no.</label>
           <input
             id="customerId"
             class="mono"
             autocomplete="off"
+            placeholder="ACC-1042"
             formControlName="customerId"
             [attr.aria-invalid]="customerIdError ? 'true' : null"
-            [attr.aria-describedby]="customerIdError ? 'customerId-error' : null"
+            [attr.aria-describedby]="
+              customerIdError ? 'customerId-hint customerId-error' : 'customerId-hint'
+            "
           />
+          <p class="field-hint" id="customerId-hint">The account code from your sales system.</p>
           @if (customerIdError) {
             <p class="field-error" id="customerId-error">{{ customerIdError }}</p>
           }

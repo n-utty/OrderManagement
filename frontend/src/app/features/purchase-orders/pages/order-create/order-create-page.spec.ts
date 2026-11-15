@@ -87,6 +87,12 @@ describe('OrderCreatePage', () => {
     );
     expect(field('#line-0-price-error').textContent).toContain('Unit price is required.');
     expect(field('#externalReference').getAttribute('aria-invalid')).toBe('true');
+    expect(field('#customerId-error').textContent).toContain('Customer account no. is required.');
+  });
+
+  it('labels the customer field as the account number from the sales system', () => {
+    expect(field('label[for="customerId"]').textContent?.trim()).toBe('Customer account no.');
+    expect(field('#customerId').placeholder).toBe('ACC-1042');
   });
 
   it('shows a live estimate of line totals and the subtotal', async () => {

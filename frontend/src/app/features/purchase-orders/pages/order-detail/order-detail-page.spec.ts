@@ -65,6 +65,14 @@ describe('OrderDetailPage', () => {
     expect(actionLabels(page)).toEqual(['Confirm order', 'Cancel order']);
   });
 
+  it('shows the customer account number under that label', async () => {
+    const page = await openWith(aPurchaseOrder({ id, customerId: 'ACC-1042' }));
+
+    const terms = Array.from(page.querySelectorAll('dt'), (dt) => dt.textContent?.trim());
+    expect(terms).toContain('Customer account no.');
+    expect(page.querySelector('dt + dd.mono')?.textContent?.trim()).toBe('ACC-1042');
+  });
+
   it('offers fulfilment once confirmed', async () => {
     const page = await openWith(
       aPurchaseOrder({ id, status: 'Confirmed', allowedTransitions: ['Fulfilled', 'Cancelled'] }),
