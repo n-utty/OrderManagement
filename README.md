@@ -75,8 +75,13 @@ API_URL=https://localhost:44323 npm start              # bash
 
 ## Run the tests
 
+From the repo root:
+
 ```bash
 cd backend && dotnet test OrderManagement.slnx
+```
+
+```bash
 cd frontend && npm test -- --watch=false
 ```
 

@@ -85,7 +85,7 @@ describe('order form validators', () => {
   });
 
   describe('unitPrice', () => {
-    it.each([0, 1, 19.9, 19.99, 1000000.01])('accepts %d', (value) => {
+    it.each([0, 1, 19.9, 19.99, 1000000])('accepts %d', (value) => {
       expect(run(unitPrice, value)).toBeNull();
     });
 
@@ -95,6 +95,12 @@ describe('order form validators', () => {
 
     it('rejects negative prices', () => {
       expect(run(unitPrice, -0.01)).toEqual({ unitPrice: "Unit price can't be negative." });
+    });
+
+    it('rejects prices above the maximum', () => {
+      expect(run(unitPrice, 1000000.01)).toEqual({
+        unitPrice: 'Unit price can be at most 1,000,000.00.',
+      });
     });
 
     it.each([19.999, 1.005, 0.001])('rejects %d for having more than 2 decimals', (value) => {

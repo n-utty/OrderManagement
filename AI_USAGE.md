@@ -1,6 +1,6 @@
 # AI usage
 
-The brief allows AI tools and asks for the prompts and my reasoning. This page covers how I used them, where I changed course, and how I checked the output. The full prompts are at the bottom.
+This page covers how I used AI tools, where I changed course, and how I checked the output. The full prompts are at the bottom.
 
 ## Tools and how I split the work
 
@@ -40,12 +40,12 @@ These were my calls, and they shaped the final design more than anything else.
 - **Routed pages instead of a master–detail layout.** I asked what the industry standard is and what the trade-offs are, then chose routed pages as simpler to build, test and demo.
 - **Orders are submit-once.** I questioned how users fix a mistake on a line item. Editing isn't in the brief, so I kept orders submit-once: cancel and resubmit with a new reference. I also declined extra features the AI suggested, like a "duplicate as new order" button, to keep scope tight.
 - **Customer id.** I questioned whether it was a database id, which users shouldn't type. It's the customer's account code from the sales team's own system, so I had the UI label changed to "Customer account no.".
-- **Visual design.** I asked for a simple, non-AI-looking design: three colours with a light and dark toggle. I picked the palette from three options.
+- **Visual design.** I asked for a simple, non-AI-looking design: three colours with a light and dark toggle. I picked the palette from three options. Later I gave each order status its own muted colour (amber, blue, green, grey), because tints of one accent were hard to tell apart.
 
 ## How I checked the output
 
 - **Builds and tests:** I ran `dotnet build`, `dotnet test` and the frontend tests and build myself after every stage.
-- **Package warnings:** I fixed build errors and package warnings, keeping everything on .NET 10 LTS and stable packages. A known SQLite advisory that couldn't be fixed safely is documented in SOLUTION.md.
+- **Package warnings:** I fixed build errors and package warnings, keeping everything on .NET 10 LTS and stable packages. The SQLite advisory (NU1903) was resolved by a newer EF Core 10.0.x patch; `dotnet list package --vulnerable --include-transitive` now reports no vulnerable packages, as noted under "Known issues" in [SOLUTION.md](SOLUTION.md#known-issues).
 - **Every flow by hand:** I tried each flow in the running app: create, resubmit unchanged, resubmit changed (conflict), invalid input, and allowed and blocked status changes.
 - **Reading the code:** I read the code for each stage and asked for a walkthrough wherever something wasn't clear before committing it.
 

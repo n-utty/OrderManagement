@@ -55,7 +55,7 @@ This is the core of the brief: a rep resubmitting an order must not create a sec
 
 ## Validation and errors
 
-- **Server:** each request type has a FluentValidation validator (lengths, the reference character set, email, the currency allow-list, 1–100 lines, quantity ≥ 1, unit price ≥ 0 with at most 2 decimals, no duplicate SKUs). The manager calls them before doing any work.
+- **Server:** each request type has a FluentValidation validator (lengths, the reference character set, email, the currency allow-list, 1–100 lines, quantity ≥ 1, unit price from 0 to 1,000,000.00 with at most 2 decimals, no duplicate SKUs). The price cap keeps line totals well inside `decimal` and the `(18,2)` column, so an extreme value is a 400 instead of an overflow. The manager calls them before doing any work.
 - **Exceptions to responses:** the domain throws `NotFoundException`, `ConflictException` (carries `existingOrderId`) and `BusinessRuleException` (carries structured details). One middleware maps these, validation failures and unreadable requests to ProblemDetails: 400 (with errors grouped by field), 404, 409, 422. Anything else becomes a 500 with no internal detail; the exception is logged.
 - **Client:** the form's validators mirror the server's rules and limits for immediate feedback. Errors show under each field once it has been touched or a submit was attempted. Server field errors from a 400 (for example `LineItems[0].Quantity`) are mapped back onto the matching controls; anything without a matching field goes into the summary at the top. The server remains the authority.
 - **Totals** are calculated only on the server. The create form shows a live estimate, labelled "Estimate – final totals are calculated by the server".
