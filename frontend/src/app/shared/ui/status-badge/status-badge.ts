@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import type { OrderStatus } from '../../../features/purchase-orders/models';
 
-// Statuses are told apart by tint strength of the theme colours rather than new hues:
-// neutral (pending) → accent tint (confirmed) → stronger accent (fulfilled) → muted outline (cancelled).
+// One muted hue per status, each tinted against the background so badges sit on the surface:
+// amber (pending), accent blue (confirmed), green (fulfilled), grey (cancelled). Red stays for errors.
+// Text colours were checked for WCAG AA (4.5:1) against their badge background in both themes.
 @Component({
   selector: 'app-status-badge',
   template: '{{ status() }}',
@@ -10,14 +11,20 @@ import type { OrderStatus } from '../../../features/purchase-orders/models';
     :host {
       display: inline-block;
       padding: 0.0625rem var(--space-2);
-      border: 1px solid var(--color-border-strong);
+      border: 1px solid var(--color-border);
       border-radius: var(--radius-sm);
       background: var(--color-hover);
-      color: var(--color-ink);
+      color: color-mix(in srgb, var(--color-ink) 72%, var(--color-bg));
       font-size: var(--text-xs);
       font-weight: 500;
       line-height: 1.5;
       white-space: nowrap;
+    }
+
+    :host([data-status='Pending']) {
+      border-color: color-mix(in srgb, var(--color-pending) 35%, var(--color-bg));
+      background: var(--color-pending-tint);
+      color: var(--color-pending);
     }
 
     :host([data-status='Confirmed']) {
@@ -27,15 +34,9 @@ import type { OrderStatus } from '../../../features/purchase-orders/models';
     }
 
     :host([data-status='Fulfilled']) {
-      border-color: color-mix(in srgb, var(--color-accent) 60%, var(--color-bg));
-      background: color-mix(in srgb, var(--color-accent) 24%, var(--color-bg));
-      color: var(--color-accent-strong);
-    }
-
-    :host([data-status='Cancelled']) {
-      border-color: var(--color-border);
-      background: transparent;
-      color: var(--color-muted);
+      border-color: color-mix(in srgb, var(--color-fulfilled) 35%, var(--color-bg));
+      background: var(--color-fulfilled-tint);
+      color: var(--color-fulfilled);
     }
   `,
   host: { '[attr.data-status]': 'status()' },

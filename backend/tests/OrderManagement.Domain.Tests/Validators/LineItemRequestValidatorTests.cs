@@ -92,6 +92,21 @@ public class LineItemRequestValidatorTests
             .ShouldNotHaveValidationErrorFor(x => x.UnitPrice);
     }
 
+    [Fact]
+    public void Unit_price_at_the_maximum_passes()
+    {
+        _validator.TestValidate(Valid with { UnitPrice = LineItemRequestValidator.UnitPriceMax })
+            .ShouldNotHaveValidationErrorFor(x => x.UnitPrice);
+    }
+
+    [Fact]
+    public void Unit_price_above_the_maximum_is_rejected()
+    {
+        _validator.TestValidate(Valid with { UnitPrice = LineItemRequestValidator.UnitPriceMax + 0.01m })
+            .ShouldHaveValidationErrorFor(x => x.UnitPrice)
+            .WithErrorMessage("Unit price can be at most 1,000,000.00.");
+    }
+
     [Theory]
     [InlineData("10.123")]
     [InlineData("0.001")]

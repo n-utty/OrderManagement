@@ -18,6 +18,7 @@ export const ORDER_LIMITS = {
   sku: 64,
   lineItemName: 200,
   maxLineItems: 100,
+  unitPriceMax: 1_000_000,
 } as const;
 
 export const CURRENCIES = ['ZAR', 'USD', 'EUR', 'GBP'] as const;
@@ -74,6 +75,9 @@ export const unitPrice: ValidatorFn = (control) => {
     return { unitPrice: 'Enter a price, for example 12.50.' };
   }
   if (value < 0) return { unitPrice: "Unit price can't be negative." };
+  if (value > ORDER_LIMITS.unitPriceMax) {
+    return { unitPrice: 'Unit price can be at most 1,000,000.00.' };
+  }
   // toFixed rounds to cents; anything it changes had more than 2 decimals.
   return Number(value.toFixed(2)) === value
     ? null

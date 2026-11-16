@@ -63,4 +63,24 @@ public class SubmitPurchaseOrderEndpointTests(OrderManagementApiFactory factory)
         Assert.True(errors.TryGetProperty("CustomerEmail", out _));
         Assert.True(errors.TryGetProperty("LineItems[0].Quantity", out _));
     }
+
+    [Fact]
+    public async Task A_unit_price_above_the_maximum_returns_400_instead_of_overflowing()
+    {
+        var order = new
+        {
+            externalReference = ApiRequests.NewReference(),
+            customerId = "CUST-001",
+            customerName = "Acme Trading",
+            customerEmail = "orders@acme.example",
+            currency = "ZAR",
+            lineItems = new[] { new { sku = "SKU-A", name = "Widget", quantity = int.MaxValue, unitPrice = 1e25m } },
+        };
+
+        var response = await _client.PostAsJsonAsync(ApiRequests.PurchaseOrders, order);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var errors = (await response.ReadJsonAsync()).GetProperty("errors");
+        Assert.True(errors.TryGetProperty("LineItems[0].UnitPrice", out _));
+    }
 }
